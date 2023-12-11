@@ -1,0 +1,260 @@
+#-------------------------------------------------------------------------------
+# Name:        Final Project
+# Purpose:
+#
+# Author:      Jonathan Beals
+#
+# Created:     29/10/2023
+# Copyright:   (c) JonBe 2023
+# Licence:     <your licence>
+#-------------------------------------------------------------------------------
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
+
+import turtle
+import tkinter as tk
+import random
+import time
+
+def user_input():
+    user_name = input("Enter your name: ")
+
+    # Get turtle choice
+    print("Choose a turtle to bet on:")
+    print("1 - Turtle 1")
+    print("2 - Turtle 2")
+    print("3 - Turtle 3")
+    print("4 - Turtle 4")
+    print("5 - Turtle 5")
+
+    turtle_choice = int(input("Choose a Turtle. 1-5: "))
+    return user_name, turtle_choice
+
+#Print Turtle Race.
+def print_word(word, x, y, tess, font=("Arial", 48, "bold")):
+    tess.color("white", "black")
+    tess.penup()
+    tess.goto(x, y)
+    tess.write(word, align="center", font=font)
+    tess.hideturtle()
+
+def screen_setup():
+    global tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5, wn
+
+    turtle.resetscreen()
+
+    wn = turtle.Screen()
+    wn.setup(1400,700)
+
+    #Print Turtle Number.
+    def print_number(word, x, y, font=("Arial", 32, "bold")):
+        keke.color("white", "black")
+        keke.penup()
+        keke.goto(x, y)
+        keke.write(word, align="center", font=font)
+        keke.hideturtle()
+
+    # Set up tess
+    tess = turtle.Turtle()
+    tess.color("black")
+    tess.pensize(3)
+    tess.speed(10)
+    tess.penup()
+    tess.speed(1000)
+    wn = turtle.Screen()
+    wn.setup(1400,700)
+    turtle.bgpic("background.gif")
+    print_word("Turtle Race!!", 0, 270, tess)
+    tess.left(90)
+    tess.hideturtle()
+
+    #Set up keke
+    keke = turtle.Turtle()
+
+
+    #Bring window to the front
+    rootwindow = wn.getcanvas().winfo_toplevel()
+    rootwindow.call('wm', 'attributes', '.', '-topmost', '1')
+    rootwindow.call('wm', 'attributes', '.', '-topmost', '0')
+
+    #Set up alex
+    alex = turtle.Turtle()
+    alex.color("white", "sienna3")
+    alex.pensize(3)
+    alex.penup()
+    alex.speed(10)
+    wn = turtle.Screen()
+    wn.setup(1400,700)
+    alex.goto(-700, -205)
+    alex.hideturtle()
+
+    # Function to draw a rectangle
+    def draw_rectangle():
+        alex.pendown()
+        alex.begin_fill()
+        for _ in range(2):
+            alex.forward(1500)
+            alex.left(90)
+            alex.forward(80)
+            alex.left(90)
+        alex.end_fill()
+
+    # Function to draw track
+    def draw_track():
+        for _ in range(5):
+            draw_rectangle()
+            alex.penup()
+            alex.goto(-700, alex.ycor() + 83)
+
+    # Draw track
+    draw_track()
+
+
+    print_number("1", -660, 140)
+    print_number("2", -660, 60)
+    print_number("3", -660, -25)
+    print_number("4", -660, -110)
+    print_number("5", -660, -190)
+
+
+    def draw_square(size, color):
+        for i in range(4):
+            tess.forward(20)
+            tess.right(90)
+
+    def draw_checkerboard_line(turtle, color1, color2, x, y1, y2, num_squares):
+        turtle.penup()
+        turtle.goto(x, y1)
+
+        for i in range(num_squares):
+            if i % 2 == 0:
+                turtle.color(color1)
+            else:
+                turtle.color(color2)
+
+            turtle.pendown()
+            turtle.begin_fill()
+            for b in range(4):
+                turtle.forward(20)
+                turtle.right(90)
+            turtle.end_fill()
+            turtle.forward(20)
+
+
+
+    # Draw start line
+    draw_checkerboard_line(tess, "black", "white", -600, -200, 300, 20)
+    draw_checkerboard_line(tess, "white", "black", -580, -200, 300, 20)
+
+    # Draw finish line
+    draw_checkerboard_line(tess, "black", "white", 640, -200, 300, 20)
+    draw_checkerboard_line(tess, "white", "black", 620, -200, 300, 20)
+
+
+    # Create turtles
+    turtle1 = turtle.Turtle()
+    turtle2 = turtle.Turtle()
+    turtle3 = turtle.Turtle()
+    turtle4 = turtle.Turtle()
+    turtle5 = turtle.Turtle()
+
+    # Setup turtles
+    def setup_turtle(turtle, color, start_pos):
+        turtle.shape("turtle")
+        turtle.color(color)
+        turtle.penup()
+        turtle.goto(start_pos)
+
+    # Position turtles
+    setup_turtle(turtle1, "deepskyblue", (-640, 172))
+    setup_turtle(turtle2, "mediumpurple", (-640, 85))
+    setup_turtle(turtle3, "black", (-640, 0))
+    setup_turtle(turtle4, "crimson", (-640, -85))
+    setup_turtle(turtle5, "slategrey", (-640, -172))
+
+    return wn, tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5
+
+def race_game(turtle1, turtle2, turtle3, turtle4, turtle5):
+    global user_name, turtle_choice, root
+    def crossed_stop_point(turtle, stop_point_x):
+        return turtle.xcor() >= stop_point_x
+
+    def race(turtle1, turtle2, turtle3, turtle4, turtle5, stop_point_x):
+        while True:
+            turtle1.forward(random.randint(0, 40))
+            turtle2.forward(random.randint(0, 40))
+            turtle3.forward(random.randint(0, 40))
+            turtle4.forward(random.randint(0, 40))
+            turtle5.forward(random.randint(0, 40))
+
+            # Check if any turtle has reached the stop point
+            if any(crossed_stop_point(t, stop_point_x)
+                for t in [turtle1, turtle2, turtle3, turtle4, turtle5]):
+                    break
+
+    # Set up the stop point
+    stop_point_x = 630
+
+    # Call the race function with the turtles and stop point
+    race(turtle1, turtle2, turtle3, turtle4, turtle5, stop_point_x)
+
+    winning_turtle = None
+    for i, turtle in enumerate([turtle1, turtle2, turtle3, turtle4, turtle5], 1):
+        if crossed_stop_point(turtle, stop_point_x):
+            winning_turtle = i
+            break
+
+    # Check if the user's turtle wins
+    user_wins = False
+    if winning_turtle == turtle_choice:
+        user_wins = True
+        winner_message = f"Congrats, {user_name}! Your turtle won!"
+    else:
+        winner_message = f"The Winner is Turtle # {winning_turtle}."
+
+    # Display the winner on the turtle screen
+    print_word(winner_message, 0, -40, tess)
+    return winning_turtle
+
+def reset_turtle_position(turtles):
+    for turtle in turtles:
+        turtle.goto(-640, turtle.ycor())
+
+def restart_game(turtles):
+    reset_turtle_position(turtles)
+
+    while True:
+        play_again = input("Do you want to play again? Yes/No: ").lower()
+        if play_again != "yes":
+            root.destroy()
+            break
+        else:
+            race_game(*turtles)
+            reset_turtle_position(turtles)
+
+def main():
+    global user_name, turtle_choice, wn, turtle1, turtle2, turtle3, turtle4, turtle5, tess, keke, alex, root
+    root = tk.Tk()
+    root.withdraw()
+
+    while True:
+        user_name, turtle_choice = user_input()
+        wn, tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5 = screen_setup()
+        turtles = [turtle1, turtle2, turtle3, turtle4, turtle5]
+        winning_turtle = race_game(*turtles)
+        print_word(f"The Winner is Turtle # {winning_turtle}.", 0, -40, tess)
+        restart_game(turtles)
+
+        play_again = input("Do you want to play again? Yes/No: ").lower()
+        if play_again != "yes":
+            root.destroy()
+            break
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
