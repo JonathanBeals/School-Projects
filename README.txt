@@ -4,6 +4,8 @@ ask name.
 
 ask what turtle to bet on.
 
+ask if user wants to add to the betting pool.
+
 set up turtle.
 
 draw a square.
