@@ -20,10 +20,11 @@ import tkinter as tk
 import random
 import time
 
+# Get user name and turtle number.
 def user_input():
     user_name = input("Enter your name: ")
 
-    # Get turtle choice
+    # Get turtle choice.
     print("Choose a turtle to bet on:")
     print("1 - Turtle 1")
     print("2 - Turtle 2")
@@ -34,14 +35,55 @@ def user_input():
     turtle_choice = int(input("Choose a Turtle. 1-5: "))
     return user_name, turtle_choice
 
-#Print Turtle Race.
-def print_word(word, x, y, tess, font=("Arial", 48, "bold")):
-    tess.color("white", "black")
+# Write and read bet_ammount.txt file.
+def betting_pool(bet):
+    try:
+        with open('bet_amount.txt', 'r') as file:
+            file_content = file.read().strip()
+            current_amount = int(file_content) if file_content else 0
+    except FileNotFoundError:
+        current_amount = 0
+
+    random_bets = [random.randint(10, 200) for _ in range(3)]
+    total_amount = current_amount + bet + sum(random_bets)
+
+    with open('bet_amount.txt', 'w') as file:
+        file.write(str(total_amount))
+
+# Print Turtle Race.
+def print_word(word, x, y, tess, font=("Arial", 44, "bold")):
+    tess.color("white")
     tess.penup()
     tess.goto(x, y)
     tess.write(word, align="center", font=font)
     tess.hideturtle()
 
+# Setup winner message.
+def display_winner_message(message, x, y, font=("Arial", 44, "bold"), winner_turtle=None):
+    if winner_turtle:
+        winner_turtle.clear()
+        winner_turtle.goto(x, y)
+        winner_turtle.write(message, align="center", font=font)
+        winner_turtle.hideturtle()
+    else:
+        new_winner_turtle = turtle.Turtle()
+        new_winner_turtle.color("white")
+        new_winner_turtle.penup()
+        new_winner_turtle.goto(x, y)
+        new_winner_turtle.write(message, align="center", font=font)
+        new_winner_turtle.hideturtle()
+        return new_winner_turtle
+
+# Clear winner message off screen.
+def clear_winner_message(winner_turtle):
+    winner_turtle.clear()
+
+# Move turtles back to starting line.
+def reset_turtle_position(turtles):
+    for turtle in turtles:
+        turtle.goto(-640, turtle.ycor())
+
+# Setup of turtle screen.
 def screen_setup():
     global tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5, wn
 
@@ -58,7 +100,7 @@ def screen_setup():
         keke.write(word, align="center", font=font)
         keke.hideturtle()
 
-    # Set up tess
+    # Set up tess.
     tess = turtle.Turtle()
     tess.color("black")
     tess.pensize(3)
@@ -72,27 +114,28 @@ def screen_setup():
     tess.left(90)
     tess.hideturtle()
 
-    #Set up keke
+    #Set up keke.
     keke = turtle.Turtle()
 
 
     #Bring window to the front
+    #For some reason the window opens behind pyscripter.
     rootwindow = wn.getcanvas().winfo_toplevel()
     rootwindow.call('wm', 'attributes', '.', '-topmost', '1')
     rootwindow.call('wm', 'attributes', '.', '-topmost', '0')
 
-    #Set up alex
+    #Set up alex.
     alex = turtle.Turtle()
     alex.color("white", "sienna3")
     alex.pensize(3)
     alex.penup()
     alex.speed(10)
     wn = turtle.Screen()
-    wn.setup(1400,700)
+    wn.setup(1400,750)
     alex.goto(-700, -205)
     alex.hideturtle()
 
-    # Function to draw a rectangle
+    # Function to draw a rectangle for the track.
     def draw_rectangle():
         alex.pendown()
         alex.begin_fill()
@@ -103,7 +146,7 @@ def screen_setup():
             alex.left(90)
         alex.end_fill()
 
-    # Function to draw track
+    # Function to draw the track.
     def draw_track():
         for _ in range(5):
             draw_rectangle()
@@ -120,12 +163,13 @@ def screen_setup():
     print_number("4", -660, -110)
     print_number("5", -660, -190)
 
-
+    # Function to draw a square for the start and finish lines.
     def draw_square(size, color):
         for i in range(4):
             tess.forward(20)
             tess.right(90)
 
+    #Draw checkerboard line for start and finish.
     def draw_checkerboard_line(turtle, color1, color2, x, y1, y2, num_squares):
         turtle.penup()
         turtle.goto(x, y1)
@@ -146,96 +190,127 @@ def screen_setup():
 
 
 
-    # Draw start line
+    # Draw start line.
     draw_checkerboard_line(tess, "black", "white", -600, -200, 300, 20)
     draw_checkerboard_line(tess, "white", "black", -580, -200, 300, 20)
 
-    # Draw finish line
-    draw_checkerboard_line(tess, "black", "white", 640, -200, 300, 20)
-    draw_checkerboard_line(tess, "white", "black", 620, -200, 300, 20)
+    # Draw finish line.
+    draw_checkerboard_line(tess, "black", "white", 670, -200, 30, 20)
+    draw_checkerboard_line(tess, "white", "black", 650, -200, 30, 20)
 
 
-    # Create turtles
+    # Create turtles.
     turtle1 = turtle.Turtle()
     turtle2 = turtle.Turtle()
     turtle3 = turtle.Turtle()
     turtle4 = turtle.Turtle()
     turtle5 = turtle.Turtle()
 
-    # Setup turtles
+    # Setup turtles.
     def setup_turtle(turtle, color, start_pos):
         turtle.shape("turtle")
         turtle.color(color)
         turtle.penup()
         turtle.goto(start_pos)
 
-    # Position turtles
+    # Position turtles.
     setup_turtle(turtle1, "deepskyblue", (-640, 172))
     setup_turtle(turtle2, "mediumpurple", (-640, 85))
     setup_turtle(turtle3, "black", (-640, 0))
     setup_turtle(turtle4, "crimson", (-640, -85))
     setup_turtle(turtle5, "slategrey", (-640, -172))
 
+    bet_amount = 0
+    try:
+        with open('bet_amount.txt', 'r') as file:
+            bet_amount = int(file.read())
+            print_word(f"Betting Pool: ${bet_amount}", 0, 200, tess)
+    except FileNotFoundError:
+            pass
+
+    print_word(f"Betting Pool: ${bet_amount}", 0, 200, tess)
+
     return wn, tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5
 
+# Function for the race.
 def race_game(turtle1, turtle2, turtle3, turtle4, turtle5):
-    global user_name, turtle_choice, root
-    def crossed_stop_point(turtle, stop_point_x):
-        return turtle.xcor() >= stop_point_x
+    global user_name, turtle_choice
 
-    def race(turtle1, turtle2, turtle3, turtle4, turtle5, stop_point_x):
-        while True:
-            turtle1.forward(random.randint(0, 40))
-            turtle2.forward(random.randint(0, 40))
-            turtle3.forward(random.randint(0, 40))
-            turtle4.forward(random.randint(0, 40))
-            turtle5.forward(random.randint(0, 40))
+    # Check which turtle crossed finish line first.
+    def crossed_finish_line(turtle, finish_line_x):
+        return turtle.xcor() >= finish_line_x
 
-            # Check if any turtle has reached the stop point
-            if any(crossed_stop_point(t, stop_point_x)
-                for t in [turtle1, turtle2, turtle3, turtle4, turtle5]):
-                    break
-
-    # Set up the stop point
-    stop_point_x = 630
-
-    # Call the race function with the turtles and stop point
-    race(turtle1, turtle2, turtle3, turtle4, turtle5, stop_point_x)
-
+    finish_line_x = 660
     winning_turtle = None
-    for i, turtle in enumerate([turtle1, turtle2, turtle3, turtle4, turtle5], 1):
-        if crossed_stop_point(turtle, stop_point_x):
-            winning_turtle = i
+
+    # Move turtles forward at random.
+    while True:
+        turtle1.forward(random.randint(0, 60))
+        turtle2.forward(random.randint(0, 60))
+        turtle3.forward(random.randint(0, 60))
+        turtle4.forward(random.randint(0, 60))
+        turtle5.forward(random.randint(0, 60))
+
+        if any(crossed_finish_line(t, finish_line_x) for t in [turtle1, turtle2, turtle3, turtle4, turtle5]):
+            for i, turtle in enumerate([turtle1, turtle2, turtle3, turtle4, turtle5], 1):
+                if crossed_finish_line(turtle, finish_line_x):
+                    winning_turtle = i
+                    break
             break
 
-    # Check if the user's turtle wins
+    # Check if user's turtle wins and winner message.
     user_wins = False
     if winning_turtle == turtle_choice:
         user_wins = True
-        winner_message = f"Congrats, {user_name}! Your turtle won!"
-    else:
-        winner_message = f"The Winner is Turtle # {winning_turtle}."
+        congrats_message = f"Congrats, {user_name}! Your turtle won!"
+        winner_display = display_winner_message(congrats_message, 0, -40)
+        time.sleep(2)
+        if winner_display:
+            clear_winner_message(winner_display)
 
-    # Display the winner on the turtle screen
-    print_word(winner_message, 0, -40, tess)
-    return winning_turtle
+    # Show winner message only if the user wins.
+    if user_wins:
+        return winning_turtle, user_wins
 
-def reset_turtle_position(turtles):
-    for turtle in turtles:
-        turtle.goto(-640, turtle.ycor())
+    # Display winner message if the user didn't win.
+    winner_message = f"The Winner is Turtle # {winning_turtle}."
+    winner_display = display_winner_message(winner_message, 0, -40)
+    time.sleep(1)
+    if winner_display:
+        clear_winner_message(winner_display)
 
-def restart_game(turtles):
+    reset_turtle_position([turtle1, turtle2, turtle3, turtle4, turtle5])
+    return winning_turtle, user_wins
+
+# Setup game for another race if user wants to play again.
+def restart_game(turtles, winner_display=None):
+    global user_name, turtle_choice, wn
     reset_turtle_position(turtles)
 
     while True:
-        play_again = input("Do you want to play again? Yes/No: ").lower()
-        if play_again != "yes":
-            root.destroy()
-            break
-        else:
-            race_game(*turtles)
-            reset_turtle_position(turtles)
+        if winner_display:
+            clear_winner_message(winner_display)
 
+        play_again = input("Do you want to play again? Yes/No: ").lower()
+        if play_again == "no":
+            wn.bye()
+            return
+        elif play_again != "yes":
+            continue
+
+        reset_turtle_position(turtles)
+        if winner_display:
+            clear_winner_message(winner_display)
+
+        winning_turtle, user_wins = race_game(*turtles)
+        if user_wins:
+            congrats_message = f"Congrats, {user_name}! Your turtle won!"
+            winner_display = display_winner_message(congrats_message, 0, -40)
+
+        winner_message = f"The Winner is Turtle # {winning_turtle}."
+        winner_display = display_winner_message(winner_message, 0, -40)
+
+# Function to control how the program logic flows
 def main():
     global user_name, turtle_choice, wn, turtle1, turtle2, turtle3, turtle4, turtle5, tess, keke, alex, root
     root = tk.Tk()
@@ -243,16 +318,17 @@ def main():
 
     while True:
         user_name, turtle_choice = user_input()
+        bet = int(input("How much would you like to bet? $"))
+        betting_pool(bet)
         wn, tess, keke, alex, turtle1, turtle2, turtle3, turtle4, turtle5 = screen_setup()
         turtles = [turtle1, turtle2, turtle3, turtle4, turtle5]
-        winning_turtle = race_game(*turtles)
-        print_word(f"The Winner is Turtle # {winning_turtle}.", 0, -40, tess)
-        restart_game(turtles)
+        winning_turtle, user_wins = race_game(*turtles)
+        luna = f"The Winner is Turtle # {winning_turtle}."
+        winner_display = display_winner_message(luna, 0, -40)
+        restart_game(turtles, winner_display)
+        root.destroy()
+        break
 
-        play_again = input("Do you want to play again? Yes/No: ").lower()
-        if play_again != "yes":
-            root.destroy()
-            break
 
     root.mainloop()
 
